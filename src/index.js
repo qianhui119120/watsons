@@ -1,8 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
+
 import * as serviceWorker from './serviceWorker';
+import 'react-flexible';
+import 'reset-css';
+import 'antd/dist/antd.css';
+import App from './router';
+
 
 ReactDOM.render(<App />, document.getElementById('root'));
 
