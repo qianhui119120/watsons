@@ -2,9 +2,16 @@ import React,{Component} from 'react';
 import './index.scss';
 import {Button} from 'antd';
 import TopNav from '../TopNav';
+import RecommendWrap from '../RecommendWrap';
 
 
 export default class ShoppingCartContainer extends Component {
+    //组件销毁前  ，将未更新完的状态停止
+   componentWillUnmount(){
+       this.setState=(state,callback)=>{
+           return;
+       }
+   }
     constructor(){
         super();
         this.state = {
@@ -27,7 +34,7 @@ export default class ShoppingCartContainer extends Component {
         this.props.history.push('/');
     }
     render(){
-        if(localStorage.getItem('cart')!=='[]'){
+        if(localStorage.getItem('cart')){
             return(
                 <div className='shoppingCartContainer'>
                 <ul className='shoppingCartContainer-new_slogen_list'>
@@ -46,6 +53,7 @@ export default class ShoppingCartContainer extends Component {
                     您应立即停止继续使用屈臣氏提供的服务。【点击查阅】
                     </div>
                     <TopNav history={this.props.history}/>
+                    <RecommendWrap/>
                 </div>
             )}
             else{
@@ -59,6 +67,7 @@ export default class ShoppingCartContainer extends Component {
                         <Button onClick={this.goHome} className='shoppingCartToHome' type='primary'>去首页逛逛</Button>
                     </div>
                  <TopNav history={this.props.history}/>
+                <RecommendWrap/>
                 </div>
             )}
     }

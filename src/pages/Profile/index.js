@@ -24,7 +24,7 @@ export default class Profile extends Component {
     componentDidMount(){
         axios({
             method:'get',
-            url:'http://192.168.2.251:7001/center',
+            url:'http://127.0.0.1:7001/center',
             headers:{
                 'Authorization':localStorage['token']
             }

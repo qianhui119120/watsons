@@ -67,10 +67,10 @@ export default class Login extends Component {
                 phoneTip:'请输入正确的手机号'
             })
         }else{
-            axios.get('http://192.168.2.251:7001/sms/addSms?phone='+phone)
+            axios.get('http://127.0.0.1:7001/sms/addSms?phone='+phone)
             .then((resp)=>{
                 // console.log(resp.data)
-                axios.get('http://192.168.2.251:7001/sms/querySms?phone='+phone)
+                axios.get('http://127.0.0.1:7001/sms/querySms?phone='+phone)
                 .then((res)=>{
                     // console.log(res.data.success.smsCode)
                     this.setState({
@@ -119,7 +119,7 @@ export default class Login extends Component {
                 params.append('phone',this.state.phone);
                 params.append('smsCode',this.state.smsCode);
                 // axios.post('http://192.168.2.251:7001/user/login',params)
-                axios.post('http://192.168.2.251:7001/user/login',params)
+                axios.post('http://127.0.0.1:7001/user/login',params)
                 .then((resp)=>{
                     // console.log(resp.data.data)
                     localStorage['token']=resp.data.data.token;

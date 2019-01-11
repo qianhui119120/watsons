@@ -1,10 +1,8 @@
 import React,{Component} from 'react';
 import { Checkbox } from 'antd';
 import './index.scss'
-import RecommendWrap from '../RecommendWrap';
 
-const plainOptions = ['Apple', 'Pear', 'Orange'];
-const CheckboxGroup = Checkbox.Group;
+
 export default class CartList extends Component {
     constructor(){
         super();
@@ -12,21 +10,32 @@ export default class CartList extends Component {
             cartItem:[],
             display:'none',
             totalPrice:0,
+            totalCount:0,
 
-            indeterminate: true,
-            checkAll: false,
+            // checked:true,
+            checkedAll: false,
         }
     }
     componentDidMount(){
         let cartItem = JSON.parse(localStorage.getItem('cart'));
-        let arr = [];
-        this.setState({
-            cartItem:cartItem
-        })
-        this.totalPrice();
+        if (cartItem) {
+            this.setState({
+                cartItem:cartItem
+            })
+            let arr =[];
+            for(let i in cartItem){
+                if(cartItem[i].checked){
+                    arr.push(cartItem[i])
+                    this.setState({
+                        checkedAll:arr.length===cartItem.length
+                    })
+                }
+            }
+            this.totalPrice(cartItem);            
+        }
     }
     delete=(item)=>{
-       let cartItem = JSON.parse(localStorage.getItem('cart'));
+       let cartItem = this.state.cartItem;
        for (let i = 0; i < cartItem.length; i++) {
            const element = cartItem[i];
            if (element.item_id === item.item_id) {
@@ -37,10 +46,14 @@ export default class CartList extends Component {
                })
            }
        }
-       this.totalPrice();
+       //最后一条数据时,cart 缓存移除
+       if (cartItem.length===0) {
+           localStorage.removeItem('cart');
+       }
+       this.totalPrice(cartItem);
     }
     reduce=(item)=>{
-        let cartItem = JSON.parse(localStorage.getItem('cart'));
+        let cartItem = this.state.cartItem;
        for (let i = 0; i < cartItem.length; i++) {
            const element = cartItem[i];
            if (element.item_id === item.item_id) {
@@ -64,10 +77,10 @@ export default class CartList extends Component {
                }
            }
        }
-       this.totalPrice();
+       this.totalPrice(cartItem);
     }
     add=(item)=>{
-        let cartItem = JSON.parse(localStorage.getItem('cart'));
+        let cartItem = this.state.cartItem;
        for (let i = 0; i < cartItem.length; i++) {
            const element = cartItem[i];
            if (element.item_id === item.item_id) {
@@ -78,59 +91,99 @@ export default class CartList extends Component {
                })
            }
        }
-       this.totalPrice();
+       this.totalPrice(cartItem);
     }
-    totalPrice=()=>{
-        let cartItem = JSON.parse(localStorage.getItem('cart'));
+    totalPrice=(cartItem)=>{
         let totalPrice = 0;
+        let totalCount = 0;
         for (let i = 0; i < cartItem.length; i++) {
             const element = cartItem[i];
-           totalPrice += (element.count*(element.min_price/100));
-           this.setState({
-               totalPrice:totalPrice
-           })
+            if (element.checked) {
+                totalPrice += (element.count*(element.min_price/100));
+                totalCount += element.count;               
+            }
+            this.setState({
+                totalPrice:totalPrice,
+                totalCount:totalCount,
+                checked:element.checked
+            }) 
         }
      }
      
-     onChange = (checkedList) => {
-        this.setState({
-          checkedList,
-          indeterminate: !!checkedList.length && (checkedList.length < plainOptions.length),
-          checkAll: checkedList.length === plainOptions.length,
-        });
+     onChange = (item) => {
+        let cartItem = this.state.cartItem;
+        let checked = !item.checked;
+        let checkArr = [];
+        for (let i = 0; i < cartItem.length; i++) {
+            const element = cartItem[i];
+            if (element.item_id === item.item_id) {
+                element.checked = checked;
+                localStorage.setItem('cart',JSON.stringify(cartItem));
+                this.setState({
+                 cartItem:cartItem,
+                //  checked:checked
+                })
+            }
+            if (element.checked) {
+                checkArr.push(element)
+            }
+            if (checkArr.length===cartItem.length) {
+                this.setState({
+                    checkedAll:true
+                })
+            }else{
+                this.setState({
+                    checkedAll:false
+                })
+            }
+            
+        }
+        this.totalPrice(cartItem);
       }
     
-      onCheckAllChange = (e) => {
+      onCheckAllChange = () => {
+        let cartItem = this.state.cartItem;
         this.setState({
-          checkedList: e.target.checked ? plainOptions : [],
-          indeterminate: false,
-          checkAll: e.target.checked,
+          checkedAll:!this.state.checkedAll
         });
+        for(let i in cartItem){
+            cartItem[i].checked = !this.state.checkedAll;
+        }
+        localStorage.setItem('cart',JSON.stringify(cartItem));
+        this.totalPrice(cartItem);
       }
+      //组件销毁前  ，将未更新完的状态停止
+     componentWillUnmount(){
+         this.setState=(state,callback)=>{
+             return;
+         }
+     }
+
     render(){
         return(
             <div className='cartListContent'>
                 <div className='sellAlert' style={{'display':this.state.display}}>该商品最少1件起售</div>
-                <div className='cartAccount'>
-                <Checkbox
-                    indeterminate={this.state.indeterminate}
-                    onChange={this.onCheckAllChange}
-                    checked={this.state.checkAll}
-                >
-                    Check all
-                </Checkbox>
-                <div>
-                    <span>合计:</span>
-                    <span>{this.state.totalPrice.toFixed(2)}</span>
-                </div>
-                <div>去结算</div>
+                <div className='cartAccount' style={localStorage.getItem('cart')==='[]'?{'display':'none'}:{'display':'flex'}}>
+                    <Checkbox
+                        className='cartAccountCheck'
+                        onChange={this.onCheckAllChange}
+                        checked={this.state.checkedAll}
+                    >
+                        全选
+                    </Checkbox>
+                    <div className='cartAccountPrice'>
+                        <span>合计:</span>
+                        <span>¥{this.state.totalPrice.toFixed(2)}</span>
+                    </div>
+                    <div className='cartAccountBtn'>去结算({this.state.totalCount})</div>
                 </div>
                 <ul className='cartList'>
                     {
                         this.state.cartItem.map((item,index)=>{
                             return<li className='cartListItem' key={item.item_id+index}>
                                     <div className='checkboxWrap'>
-        <CheckboxGroup options={plainOptions} value={this.state.checkedList} onChange={this.onChange} />
+                                    <Checkbox onChange={()=>this.onChange(item)} 
+                                    checked={item.checked}/>
                                     </div>
                                     <img className='cartListItemimg' src={item.over_image_url} alt=''/>
                                     <div className='cartListItemDetial'>
@@ -157,7 +210,6 @@ export default class CartList extends Component {
                         })
                     }
                 </ul>
-                <RecommendWrap itemId = {this.state.itemId}/>
             </div>
         )
     }

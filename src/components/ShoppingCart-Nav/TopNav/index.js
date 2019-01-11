@@ -3,6 +3,12 @@ import './index.scss';
 import CartList from '../CartList'
 
 export default class TopNav extends Component {
+    //组件销毁前  ，将未更新完的状态停止
+   componentWillUnmount(){
+       this.setState=(state,callback)=>{
+           return;
+       }
+   }
     goBack=()=>{
         this.props.history.go(-1)
     }

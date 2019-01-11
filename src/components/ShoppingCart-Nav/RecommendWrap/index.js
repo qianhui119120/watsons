@@ -2,21 +2,29 @@ import React,{Component} from 'react';
 import './index.scss';
 import axios from 'axios'
 
-///act/mop/aladdin/recommend?source=EXCLUSION&count=50&offset=0&items=23502
-///act/mop/aladdin/recommend?source=EXCLUSION&count=50&offset=0&items=23663,9163,25442
+
 export default class RecommendWrap extends Component {
+    //组件销毁前  ，将未更新完的状态停止
+   componentWillUnmount(){
+       this.setState=(state,callback)=>{
+           return;
+       }
+   }
     constructor(){
         super();
         this.state = {
-            recommend:[]
+            recommend:[],
+            data:[]
         }
     }
     componentDidMount(){ 
         let cartItem = JSON.parse(localStorage.getItem('cart'));
         let itemId = [];
-        for (let i = 0; i < cartItem.length; i++) {
-            const element = cartItem[i];
-            itemId.push(element.item_id)
+        if (cartItem) {
+            for (let i = 0; i < cartItem.length; i++) {
+                const element = cartItem[i];
+                itemId.push(element.item_id)
+            }            
         }
         axios.get("/act/mop/aladdin/recommend?source=EXCLUSION&count=50&offset=0&items="+itemId.toString()+"")
         .then((resp)=>{
@@ -26,6 +34,32 @@ export default class RecommendWrap extends Component {
             })
         })
     }
+    // addToCart=(item)=>{
+    //     let cartItem = JSON.parse(localStorage.getItem('cart'));
+    //     let flag = true;
+    //     let arr = [];
+    //     if (cartItem) {
+    //         for(let i in cartItem){
+    //             if (cartItem[i].item_id===item.item_id) {
+    //                 cartItem[i].count++;
+    //                 flag=false
+    //             }else{
+    //                 cartItem.push(item)
+    //             }
+    //         }
+    //         console.log(cartItem);
+    //         localStorage.setItem('cart',JSON.stringify(cartItem));
+    //     }
+    //     if (flag) {
+    //         item.count = 1;
+    //         item.checked = true;
+    //         arr.push(item);
+    //         this.setState({
+    //             data:arr
+    //         })
+    //         localStorage.setItem('cart',JSON.stringify(arr));
+    //     }
+    // }
     render(){
         return(
             <div className='recommendWrap'>

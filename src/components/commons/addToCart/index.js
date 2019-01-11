@@ -53,6 +53,7 @@ export default class AddToCart extends Component {
 
         if (flag) {//添加的第一件商品
             this.state.item.count = 1;
+            this.state.item.checked = true;
             arr.push(this.state.item);
         }
         localStorage.setItem('cart',JSON.stringify(arr));
