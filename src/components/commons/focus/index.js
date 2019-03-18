@@ -1,6 +1,6 @@
 import React,{Component} from 'react';
-import Swiper from '_swiper@3.4.2@swiper';
-import '_swiper@3.4.2@swiper/dist/css/swiper.css'
+import Swiper from 'swiper';
+import 'swiper/dist/css/swiper.css'
 import './index.scss';
 
 export default class Focus extends Component {
